@@ -201,10 +201,9 @@ repository.
 
 ## What comes immediately after this
 
-Once the generated counts and sample rows have been reviewed, the next stage is
-**feature engineering**: turn the clean readings and meal text into information a
-simple model can learn from. We will begin with understandable features—current
-glucose, recent slope, recent variability, time of day, patient clinical values,
-and meal-derived quantities—then train a simple baseline before attempting a deep
-learning model. Starting simple gives us a trustworthy comparison and makes errors
-easier to find.
+The next stage has now been implemented. **Feature engineering** turns the clean
+readings and meal text into information a model can learn from: current glucose,
+recent changes and variability, time of day, selected clinical values, medication
+event indicators, and transparent meal-text features. The first Logistic Regression
+baseline and its verified results are explained in
+[`SHANGHAI_BASELINE_MODEL.md`](SHANGHAI_BASELINE_MODEL.md).
