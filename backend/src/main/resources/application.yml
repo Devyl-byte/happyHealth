@@ -28,6 +28,7 @@ management:
   endpoint:
     health:
       show-details: always
+      show-components: always
 
 # Internal Python ML Service
 ml:

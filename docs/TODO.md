@@ -26,9 +26,9 @@ Acceptance: engineers have enough detail to work independently without inventing
 ## Phase 2: Setup and Reproducibility
 
 - [ ] M1 leads the root README.md: project title, purpose, three roles, folder map, prerequisites, service commands, and current mock status.
-- [ ] M2 documents Java 21, Maven Wrapper, H2 reset behavior, backend port, ML URL, and backend startup.
+- [x] M2 documents Java 21, Maven Wrapper, H2 reset behavior, backend port, ML URL, and backend startup.
 - [ ] M1 documents Node/npm compatibility, frontend dependency install/build, and Python 3.11 environment setup.
-- [ ] M2 documents Compose services and .env.example, distinguishing host URLs from container service names.
+- [x] M2 documents Compose services and .env.example, distinguishing host URLs from container service names.
 - [ ] Record exact chosen dependency versions through manifests/lock files; link to them rather than duplicating drifting version lists.
 - [ ] Write a short startup/troubleshooting section for occupied ports, missing runtimes, unavailable ML, and fixture mount paths.
 - [ ] M1/M2 add service-specific README files and link them from the root README.
