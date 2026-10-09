@@ -1,8 +1,12 @@
 # Documentation TODO: Phases 1-3
 
+> **Historical planning checklist:** the contracts, scope, data dictionary,
+> architecture, acceptance criteria, and submission package now exist. Use
+> `PHASE_STATUS.md` and `submission/SUBMISSION_CHECKLIST.md` for current gaps.
+
 Owners: M3 for clinical content; M1 for frontend/ML contracts and demo documentation; M2 for backend/IoT architecture and run configuration.
 Roadmap: [Project phases](PROJECT_PHASES.md).
-Status: the roadmap and folder TODOs exist; the deliverables below are planned, not completed.
+Status: retained for learning and traceability; current deliverables are tracked elsewhere.
 
 Practical companion: [HOW_TO.md](HOW_TO.md) explains the steps, tools, sources, review handoffs, and when each phase can be marked done.
 
@@ -26,9 +30,9 @@ Acceptance: engineers have enough detail to work independently without inventing
 ## Phase 2: Setup and Reproducibility
 
 - [ ] M1 leads the root README.md: project title, purpose, three roles, folder map, prerequisites, service commands, and current mock status.
-- [ ] M2 documents Java 21, Maven Wrapper, H2 reset behavior, backend port, ML URL, and backend startup.
+- [x] M2 documents Java 21, Maven Wrapper, H2 reset behavior, backend port, ML URL, and backend startup.
 - [ ] M1 documents Node/npm compatibility, frontend dependency install/build, and Python 3.11 environment setup.
-- [ ] M2 documents Compose services and .env.example, distinguishing host URLs from container service names.
+- [x] M2 documents Compose services and .env.example, distinguishing host URLs from container service names.
 - [ ] Record exact chosen dependency versions through manifests/lock files; link to them rather than duplicating drifting version lists.
 - [ ] Write a short startup/troubleshooting section for occupied ports, missing runtimes, unavailable ML, and fixture mount paths.
 - [ ] M1/M2 add service-specific README files and link them from the root README.

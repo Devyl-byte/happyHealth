@@ -1,9 +1,14 @@
 # Backend TODO: Phases 1-3
 
+> **Historical planning checklist:** the working backend now goes beyond these
+> Phase 1–3 mock requirements. See the root README and `docs/PHASE_STATUS.md` for
+> verified implementation status. Unchecked boxes below are not the current
+> challenge-readiness checklist.
+
 Owner: M2, Java/Spring Boot + IoT + digital twin developer.
 Collaborators: M1 for ML contracts and frontend integration; M3 for healthcare field review.
 Roadmap: [Project phases](../docs/PROJECT_PHASES.md).
-Status: planning checklist; all implementation tasks are pending.
+Status: retained for learning and traceability; implementation is tracked elsewhere.
 
 Practical companion: [HOW_TO.md](HOW_TO.md) explains the steps, tools, sources, review handoffs, and when each phase can be marked done.
 
@@ -29,21 +34,21 @@ Acceptance: M1 can implement frontend and FastAPI against the examples; M3 has r
 
 ## Phase 2: Project Setup
 
-- [ ] Create a Maven project in backend/ using Java 21 and a compatible pinned Spring Boot 3 release; include Maven Wrapper.
-- [ ] Add Spring Web, Validation, Data JPA, H2, Actuator, and the dependencies needed for WebClient.
-- [ ] Use the existing planned package root com.happyhealth with controller/, dto/, entity/, repository/, service/, client/, and config/.
-- [ ] Create HappyHealthApplication and environment-driven application configuration.
-- [ ] Configure port 8080 by default and the ML base URL separately from browser URLs.
-- [ ] Configure H2 for a reproducible local demo; document whether data resets on restart.
-- [ ] Add an MlServiceClient using a configured WebClient with finite connection/read timeouts.
-- [ ] Expose GET /actuator/health; distinguish backend health from dependency connectivity.
+- [x] Create a Maven project in backend/ using Java 21 and a compatible pinned Spring Boot 3 release; include Maven Wrapper.
+- [x] Add Spring Web, Validation, Data JPA, H2, Actuator, and the dependencies needed for WebClient.
+- [x] Use the existing planned package root com.happyhealth with controller/, dto/, entity/, repository/, service/, client/, and config/.
+- [x] Create HappyHealthApplication and environment-driven application configuration.
+- [x] Configure port 8080 by default and the ML base URL separately from browser URLs.
+- [x] Configure H2 for a reproducible local demo; document whether data resets on restart.
+- [x] Add an MlServiceClient using a configured WebClient with finite connection/read timeouts.
+- [x] Expose GET /actuator/health; distinguish backend health from dependency connectivity.
 - [ ] Verify ML connectivity through a documented internal probe/test against GET /health. Do not claim an overall ready state solely because the Java process started.
-- [ ] Configure local CORS for the frontend origin, or agree a Vite proxy with M1.
-- [ ] Add a backend Dockerfile and appropriate ignore rules.
-- [ ] Lead root docker-compose.yml and .env.example for backend, frontend, and ML, using service-name URLs inside containers.
-- [ ] Keep MQTT optional and absent from mandatory Phase 2 startup.
-- [ ] Add a context/health test and document native and Compose startup commands in backend/README.md.
-- [ ] Coordinate root Git ignore rules for target/, IDE files, H2 runtime files, and local environment files.
+- [x] Configure local CORS for the frontend origin, or agree a Vite proxy with M1.
+- [x] Add a backend Dockerfile and appropriate ignore rules.
+- [x] Lead root docker-compose.yml and .env.example for backend, frontend, and ML, using service-name URLs inside containers.
+- [x] Keep MQTT optional and absent from mandatory Phase 2 startup.
+- [x] Add a context/health test and document native and Compose startup commands in backend/README.md.
+- [x] Coordinate root Git ignore rules for target/, IDE files, H2 runtime files, and local environment files.
 
 Acceptance: Java builds, health is available, H2 starts, and backend reaches FastAPI both locally and in Compose.
 
