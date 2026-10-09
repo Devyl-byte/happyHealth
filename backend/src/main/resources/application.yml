@@ -1,0 +1,30 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:happyhealth;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+happyhealth:
+  demo:
+    fixture: ${HAPPYHEALTH_DEMO_FIXTURE:classpath:demo_patient_001.json}
+  ml:
+    base-url: ${HAPPYHEALTH_ML_BASE_URL:http://localhost:8000}
+  mqtt:
+    enabled: ${HAPPYHEALTH_MQTT_ENABLED:false}
+    broker-url: ${HAPPYHEALTH_MQTT_BROKER_URL:tcp://localhost:1883}
