@@ -1,5 +1,7 @@
 # How to Coordinate and Document Phases 1-3
 
+> **Archived planning record:** This file describes the original pre-implementation plan. It is retained for history and is not an instruction, current status report, API contract, or description of the implemented model. Use [`PHASE_STATUS.md`](PHASE_STATUS.md), [`API_CONTRACT.md`](API_CONTRACT.md), and the root README for current behavior.
+
 Owners: M3 for healthcare meaning; M1 for frontend/ML documentation; M2 for backend/IoT architecture and setup.
 Objective: turn the team plan into shared agreements, runnable instructions, and evidence that each phase is complete.
 Roadmap: [Project phases](PROJECT_PHASES.md).

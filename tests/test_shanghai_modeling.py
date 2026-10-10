@@ -121,6 +121,10 @@ class ShanghaiBaselineTest(unittest.TestCase):
 
             self.assertIn("validation", metadata["metrics"]["logistic_regression"])
             self.assertTrue(metadata["checks"]["future_outcomes_excluded_from_inputs"])
+            self.assertIn("180 mg/dL", metadata["target_definition"])
+            self.assertIn("40 mg/dL", metadata["target_definition"])
+            self.assertFalse(metadata["calibrated_probability"])
+            self.assertEqual(len(metadata["artifact_sha256"]), 64)
             self.assertTrue((root / "outputs" / "baseline_metrics.json").is_file())
             self.assertTrue((root / "outputs" / "baseline_predictions.csv").is_file())
             self.assertTrue((root / "outputs" / "baseline_coefficients.csv").is_file())

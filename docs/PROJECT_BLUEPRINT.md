@@ -1,5 +1,7 @@
 # HappyHealth Digital Twin Challenge 2026 - Project Blueprint
 
+> **Archived planning record:** This file describes the original pre-implementation plan. It is retained for history and is not an instruction, current status report, API contract, or description of the implemented model. Use [`PHASE_STATUS.md`](PHASE_STATUS.md), [`API_CONTRACT.md`](API_CONTRACT.md), and the root README for current behavior.
+
 ## 1. Challenge Context
 
 The Digital Twin Challenge 2026 asks teams to build a proof-of-concept healthcare digital twin that combines:

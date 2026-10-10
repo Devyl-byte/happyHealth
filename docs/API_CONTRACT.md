@@ -8,7 +8,8 @@ React browser → Spring Boot → FastAPI model service
 Synthetic CGM publisher → Spring Boot or MQTT subscriber
 ```
 
-The browser calls Spring Boot only. FastAPI and MQTT remain internal services.
+The application browser calls Spring Boot only. In Docker Compose, FastAPI and MQTT
+are not published to host ports.
 
 All timestamps are ISO 8601 UTC. Glucose uses mg/dL.
 
@@ -41,7 +42,7 @@ must not replace a newer current state.
 Builds a request from the synthetic EHR, current meal context, and recent CGM
 history, then calls FastAPI. It returns the updated twin view. If FastAPI is
 unavailable, the response contains an explicit unavailable prediction rather than a
-mock probability.
+fabricated score.
 
 ### `GET /actuator/health`
 
@@ -91,12 +92,14 @@ Successful response:
 
 ```json
 {
+  "patientId": "DEMO-001",
   "status": "available",
-  "probability": 0.71,
-  "riskBand": "high",
+  "modelScore": 0.71,
   "predictionWindowMinutes": 120,
   "predictionTime": "2026-10-09T10:15:00Z",
   "modelVersion": "shanghai-logistic-v1",
+  "targetDefinition": "Within 120 minutes after the meal, glucose either reaches at least 180 mg/dL or rises by at least 40 mg/dL above the meal-time baseline.",
+  "calibratedProbability": false,
   "topFactors": [
     {
       "feature": "baseline_glucose_mg_dl",
@@ -106,13 +109,19 @@ Successful response:
     }
   ],
   "warnings": [
+    "The model score is not a calibrated clinical probability.",
     "Research prototype using a synthetic demonstration patient."
   ]
 }
 ```
 
 Validation errors return HTTP 422. Insufficient history returns HTTP 200 with
-`status: insufficient_data`, a null probability, and specific warnings.
+`status: insufficient_data`, a null model score, and specific warnings.
+
+The Spring twin response also exposes `timelineMode`, `futureTimestamp`, and nullable
+`dataAgeSeconds`. The dashboard uses these fields to distinguish ordinary freshness
+from an accelerated simulation clock instead of displaying a future reading as
+“0 minutes old.”
 
 ## Compatibility rule
 

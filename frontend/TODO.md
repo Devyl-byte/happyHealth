@@ -1,5 +1,7 @@
 # Frontend TODO: Phases 1-3
 
+> **Archived planning record:** This file describes the original dashboard plan. It is retained for history and is not a current task list. Use [`README.md`](README.md) and [`../docs/PHASE_STATUS.md`](../docs/PHASE_STATUS.md).
+
 > **Historical planning checklist:** the working responsive dashboard is now
 > implemented and tested. See the root README and `docs/PHASE_STATUS.md` for the
 > current status.

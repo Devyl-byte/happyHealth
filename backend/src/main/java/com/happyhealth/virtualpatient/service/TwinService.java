@@ -12,9 +12,9 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Comparator;
 import java.util.List;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
@@ -41,25 +41,37 @@ public class TwinService {
                 .sorted(Comparator.comparing(CgmReading::getObservedAt)).toList();
     }
 
-    @Transactional
-    public boolean ingest(String patientId, CgmIngestRequest request) {
+    public synchronized boolean ingest(String patientId, CgmIngestRequest request) {
         patient(patientId);
-        if (readings.existsByEventId(request.eventId())) {
+        if (readings.existsByPatientIdAndEventId(patientId, request.eventId())) {
             return false;
         }
-        readings.save(new CgmReading(request.eventId(), patientId, request.observedAt(),
-                request.glucoseMgDl(), request.source()));
-        return true;
+        try {
+            readings.saveAndFlush(new CgmReading(request.eventId(), patientId,
+                    request.observedAt(), request.glucoseMgDl(), request.source()));
+            return true;
+        } catch (DataIntegrityViolationException error) {
+            if (readings.existsByPatientIdAndEventId(patientId, request.eventId())) {
+                return false;
+            }
+            throw error;
+        }
     }
 
     public TwinView view(String patientId) {
         PatientProfile patient = patient(patientId);
         List<CgmView> cgm = recentReadings(patientId).stream().map(TwinService::toView).toList();
         CgmView latest = cgm.isEmpty() ? null : cgm.get(cgm.size() - 1);
-        long age = latest == null ? 0L : Math.max(0L,
-                Duration.between(latest.observedAt(), Instant.now()).toSeconds());
+        Instant now = Instant.now();
+        boolean futureTimestamp = latest != null && latest.observedAt().isAfter(now);
+        Long age = latest == null || futureTimestamp ? null
+                : Duration.between(latest.observedAt(), now).toSeconds();
+        String timelineMode = latest != null
+                && "synthetic-cgm-simulator".equals(latest.source())
+                ? "accelerated_simulation" : "synthetic_fixture";
         var stored = predictions.get(patientId);
         return new TwinView("1.0", true, true, toView(patient), cgm, latest, age,
+                timelineMode, futureTimestamp,
                 stored == null ? null : stored.prediction(),
                 stored == null ? null : stored.updatedAt());
     }

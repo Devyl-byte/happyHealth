@@ -23,9 +23,11 @@ The complete meaning of every input is in the
 
 ## What Logistic Regression means
 
-Despite its name, Logistic Regression is a classification model. It combines the
-input features into a probability between 0 and 1. Version 1 predicts “spike” when
-that probability is at least 0.5.
+Despite its name, Logistic Regression is a classification model. Its `predict_proba`
+method produces a value between 0 and 1. This project calls that value a **model
+score** because calibration has not shown that it equals an individual patient's
+real-world probability. The 0.5 threshold is used only to report experimental
+classification metrics; the application does not assign clinical risk bands.
 
 It is a good first model because it is quick, reproducible, and easier to inspect
 than a neural network. It establishes a **baseline**: a reference result that more
@@ -65,7 +67,9 @@ meals, and 493 test meals. Patients do not cross these groups.
 
 The majority guess has higher validation accuracy and F1 because positive labels are
 very common. It cannot identify a single negative meal. Logistic Regression has
-better balanced accuracy, ROC AUC, average precision, and probability error.
+better balanced accuracy, ROC AUC, average precision, and Brier score. Its F1 remains
+lower than the majority comparator, so this baseline should not be described as a
+clinically useful alert model.
 
 ### Test patients
 
@@ -104,7 +108,8 @@ false alarms, missed positive results, and correct positive results.
 - **ROC AUC**: how well the model ranks spike meals above non-spike meals across all
   possible thresholds. `0.5` is random ranking; `1.0` is perfect ranking.
 - **Average precision**: ranking quality focused on the positive class.
-- **Brier score**: average squared probability error. Lower is better.
+- **Brier score**: average squared error of the model's probability-like output.
+  Lower is better, but a single Brier score does not prove calibration.
 
 ## How to run this stage
 

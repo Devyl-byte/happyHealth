@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react'
+import { isAxiosError } from 'axios'
 import {
   Activity,
   AlertCircle,
@@ -11,11 +12,12 @@ import {
   Wifi,
 } from 'lucide-react'
 import { getTwin, refreshPrediction } from './api/client'
-import { GlucoseChart } from './components/GlucoseChart'
 import { PredictionPanel } from './components/PredictionPanel'
 import type { Twin } from './types/twin'
 
 const PATIENT_ID = 'DEMO-001'
+const GlucoseChart = lazy(() => import('./components/GlucoseChart')
+  .then((module) => ({ default: module.GlucoseChart })))
 
 function valueOrDash(value: number | null, suffix: string) {
   return value === null ? '—' : `${value} ${suffix}`
@@ -24,6 +26,26 @@ function valueOrDash(value: number | null, suffix: string) {
 function shortTime(value: string | null) {
   if (!value) return 'Not generated'
   return new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit' }).format(new Date(value))
+}
+
+function loadErrorMessage(cause: unknown) {
+  if (isAxiosError(cause) && cause.response?.status === 404) {
+    return `Patient ${PATIENT_ID} was not found in the digital twin service.`
+  }
+  return 'The digital twin service could not be reached. Check that the backend is running.'
+}
+
+function freshness(twin: Twin) {
+  if (!twin.latestCgm) return { label: 'No CGM readings', stale: true }
+  if (twin.timelineMode === 'accelerated_simulation') {
+    return { label: `Accelerated simulation · ${shortTime(twin.latestCgm.observedAt)}`, stale: false }
+  }
+  if (twin.futureTimestamp) {
+    return { label: `Future timestamp detected · ${shortTime(twin.latestCgm.observedAt)}`, stale: true }
+  }
+  if (twin.dataAgeSeconds === null) return { label: 'Freshness unavailable', stale: true }
+  const minutes = Math.round(twin.dataAgeSeconds / 60)
+  return { label: `${minutes} min ago${minutes > 15 ? ' · stale' : ''}`, stale: minutes > 15 }
 }
 
 export default function App() {
@@ -37,8 +59,8 @@ export default function App() {
     try {
       setTwin(await getTwin(PATIENT_ID))
       setError(null)
-    } catch {
-      setError('The digital twin service could not be reached. Check that the backend is running.')
+    } catch (cause) {
+      setError(loadErrorMessage(cause))
     } finally {
       if (!quiet) setLoading(false)
     }
@@ -69,6 +91,7 @@ export default function App() {
     const prior = twin.cgmReadings.at(-2)!
     return last.glucoseMgDl - prior.glucoseMgDl
   }, [twin])
+  const freshnessState = twin ? freshness(twin) : null
 
   if (loading && !twin) {
     return <main className="center-state"><div className="spinner" /><p>Building the patient twin…</p></main>
@@ -103,7 +126,9 @@ export default function App() {
             <h1>Virtual Patient Monitor</h1>
           </div>
           <div className="topbar-actions">
-            <span className="status-chip"><span className="live-dot" /> Twin online</span>
+            <span className={`status-chip ${error ? 'warning' : ''}`}>
+              <span className="live-dot" /> {error ? 'Connection warning' : 'Twin connected'}
+            </span>
             <button className="primary-button" onClick={() => void refresh()} disabled={refreshing}>
               <RefreshCcw size={16} className={refreshing ? 'spinning' : ''} />
               {refreshing ? 'Calculating…' : 'Refresh prediction'}
@@ -129,7 +154,9 @@ export default function App() {
           <div className="patient-fact"><span>Age</span><strong>{twin.patient.ageYears} years</strong></div>
           <div className="patient-fact"><span>Sex</span><strong>{twin.patient.sex}</strong></div>
           <div className="patient-fact"><span>Primary condition</span><strong>{twin.patient.diagnoses[0] ?? '—'}</strong></div>
-          <div className="freshness"><Wifi size={15} /><span>CGM updated</span><strong>{Math.max(0, Math.round(twin.dataAgeSeconds / 60))} min ago</strong></div>
+          <div className={`freshness ${freshnessState?.stale ? 'stale' : ''}`}>
+            <Wifi size={15} /><span>CGM timeline</span><strong>{freshnessState?.label}</strong>
+          </div>
         </section>
 
         <section className="metric-grid">
@@ -150,13 +177,15 @@ export default function App() {
               <div><div className="section-kicker">Dynamic stream</div><h2>Continuous glucose history</h2></div>
               <div className="legend"><span /> CGM reading <i /> Reference 180 mg/dL</div>
             </div>
-            <GlucoseChart readings={twin.cgmReadings} />
+            <Suspense fallback={<div className="chart-empty">Loading chart…</div>}>
+              <GlucoseChart readings={twin.cgmReadings} />
+            </Suspense>
             <div className="chart-footer"><Clock3 size={14} /> Latest {twin.cgmReadings.length} readings · values ordered by observation time</div>
           </article>
 
           <article className="panel prediction-panel">
             <div className="panel-header">
-              <div><div className="section-kicker">Algorithmic forecast</div><h2>Post-meal spike risk</h2></div>
+              <div><div className="section-kicker">Algorithmic forecast</div><h2>Post-meal glucose event score</h2></div>
               <span className="generated">Updated {shortTime(twin.predictionUpdatedAt)}</span>
             </div>
             <PredictionPanel prediction={twin.prediction} />

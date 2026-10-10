@@ -1,5 +1,7 @@
 # Project Phases
 
+> **Archived planning record:** This file describes the original pre-implementation plan. It is retained for history and is not an instruction, current status report, API contract, or description of the implemented model. Use [`PHASE_STATUS.md`](PHASE_STATUS.md), [`API_CONTRACT.md`](API_CONTRACT.md), and the root README for current behavior.
+
 Status: planned. This document is the authoritative delivery sequence for happyHealth / GlucoTwin.
 The initial five folders exist; service implementation and verification are still pending.
 Checklist items must be marked complete only after their acceptance checks pass.

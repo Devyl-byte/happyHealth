@@ -4,8 +4,8 @@
 
 HappyHealth is a research proof of concept showing how static clinical context and
 simulated continuous glucose monitoring can be fused into a virtual metabolic
-patient. It estimates the probability of the project's defined glucose-spike event
-during the following 120 minutes.
+patient. It returns an uncalibrated model score for the project's defined glucose
+event during the following 120 minutes.
 
 The prototype is intended for technical demonstration and research discussion with
 a doctor-facing interface.
@@ -45,7 +45,7 @@ Before submission, the healthcare-domain lead must review:
 
 - the target definition and how it is displayed;
 - patient fields, units, and synthetic values;
-- risk-band wording;
+- model-score and calibration wording;
 - explanation wording;
 - limitations and research-use notices;
 - presentation and video statements.

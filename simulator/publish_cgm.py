@@ -41,8 +41,12 @@ def main() -> None:
     client.loop_start()
 
     topic = f"happyhealth/patients/{args.patient}/cgm"
-    observed_at = quarter_hour_now() + timedelta(minutes=15)
-    print(f"Publishing synthetic CGM to {topic}", flush=True)
+    observed_at = quarter_hour_now()
+    print(
+        f"Publishing accelerated synthetic CGM to {topic}; "
+        f"each {args.interval:g} real seconds advances simulated time by 15 minutes.",
+        flush=True,
+    )
     index = 0
     try:
         while True:

@@ -5,6 +5,6 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CgmReadingRepository extends JpaRepository<CgmReading, Long> {
-    boolean existsByEventId(String eventId);
+    boolean existsByPatientIdAndEventId(String patientId, String eventId);
     List<CgmReading> findTop96ByPatientIdOrderByObservedAtDesc(String patientId);
 }

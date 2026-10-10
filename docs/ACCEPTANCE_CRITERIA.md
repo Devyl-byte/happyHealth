@@ -31,7 +31,7 @@ item below is evidenced.
 ## Dashboard
 
 - [ ] The doctor view shows static clinical context and recent CGM history.
-- [ ] It shows prediction status, probability when available, model version, and timestamp.
+- [ ] It shows prediction status, an explicitly uncalibrated model score when available, model version, and timestamp.
 - [ ] It distinguishes synthetic data and research output from clinical advice.
 - [ ] Loading, unknown-patient, insufficient-data, stale-data, and service-error states are readable.
 - [ ] The browser communicates only with Spring Boot.

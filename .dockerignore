@@ -1,0 +1,17 @@
+.git
+.github
+.venv
+.pytest_cache
+.codex-build
+.chart-data-*
+tmp
+output
+data/external
+data/processed
+frontend/node_modules
+frontend/dist
+backend/target
+**/__pycache__
+*.pyc
+*.log
+.env

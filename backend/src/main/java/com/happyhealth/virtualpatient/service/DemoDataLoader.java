@@ -38,7 +38,7 @@ public class DemoDataLoader implements ApplicationRunner {
         Instant anchor = Instant.ofEpochSecond(currentQuarterHour);
         for (var item : fixture.cgmHistory()) {
             String eventId = "fixture-" + source.patientId() + "-" + item.minutesBefore();
-            if (!readings.existsByEventId(eventId)) {
+            if (!readings.existsByPatientIdAndEventId(source.patientId(), eventId)) {
                 readings.save(new CgmReading(eventId, source.patientId(),
                         anchor.minusSeconds(item.minutesBefore() * 60L),
                         item.glucoseMgDl(), "synthetic-demo-fixture"));

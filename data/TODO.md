@@ -1,5 +1,7 @@
 # Data TODO: Phases 1-3
 
+> **Archived planning record:** This file describes the original pre-implementation plan. It is retained for history and is not a current task list. Use [`../docs/SHANGHAI_T2DM_PIPELINE.md`](../docs/SHANGHAI_T2DM_PIPELINE.md) and [`../DATASET_GUIDE_FOR_BEGINNERS.md`](../DATASET_GUIDE_FOR_BEGINNERS.md).
+
 Technical owner: M2 for Phase 3 patient/history fixtures and import.
 ML consumer/coordinator: M1; clinical definitions and plausibility review: M3.
 Roadmap: [Project phases](../docs/PROJECT_PHASES.md).

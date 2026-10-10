@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -32,6 +33,11 @@ from scripts.build_shanghai_features import (
     FORBIDDEN_MODEL_INPUT_PATTERNS,
     MODEL_FEATURE_COLUMNS,
     TARGET_COLUMN,
+)
+
+TARGET_DEFINITION = (
+    "Within 120 minutes after the meal, glucose either reaches at least "
+    "180 mg/dL or rises by at least 40 mg/dL above the meal-time baseline."
 )
 from scripts.prepare_shanghai_t2dm import (
     PipelineValidationError,
@@ -244,6 +250,8 @@ def train_and_evaluate(
 
     coefficients = coefficient_table(logistic)
     predictions = pd.concat(prediction_frames, ignore_index=True)
+    atomic_joblib_dump(logistic, model_path)
+    artifact_sha256 = hashlib.sha256(model_path.read_bytes()).hexdigest()
     metadata = {
         "dataset": "ShanghaiT2DM",
         "model": "LogisticRegression",
@@ -253,6 +261,9 @@ def train_and_evaluate(
         "random_seed": RANDOM_SEED,
         "decision_threshold": DECISION_THRESHOLD,
         "target": TARGET_COLUMN,
+        "target_definition": TARGET_DEFINITION,
+        "calibrated_probability": False,
+        "artifact_sha256": artifact_sha256,
         "feature_count_before_missing_indicators": len(MODEL_FEATURE_COLUMNS),
         "features": MODEL_FEATURE_COLUMNS,
         "preprocessing": {
@@ -276,7 +287,6 @@ def train_and_evaluate(
     atomic_write_json(metadata, output_dir / "baseline_metrics.json")
     atomic_write_csv(predictions, output_dir / "baseline_predictions.csv")
     atomic_write_csv(coefficients, output_dir / "baseline_coefficients.csv")
-    atomic_joblib_dump(logistic, model_path)
     return metadata
 
 

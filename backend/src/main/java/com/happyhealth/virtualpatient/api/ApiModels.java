@@ -4,6 +4,7 @@ import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import java.time.Instant;
 import java.util.List;
 
@@ -11,10 +12,10 @@ public final class ApiModels {
     private ApiModels() {}
 
     public record CgmIngestRequest(
-            @NotBlank String eventId,
+            @NotBlank @Size(max = 100) String eventId,
             @NotNull Instant observedAt,
             @DecimalMin("40.0") @DecimalMax("500.0") double glucoseMgDl,
-            @NotBlank String source) {}
+            @NotBlank @Size(max = 100) String source) {}
 
     public record CgmView(String eventId, Instant observedAt, double glucoseMgDl, String source) {}
 
@@ -28,14 +29,16 @@ public final class ApiModels {
                              double contribution) {}
 
     public record PredictionView(
-            String status, Double probability, String riskBand,
+            String status, Double modelScore,
             int predictionWindowMinutes, Instant predictionTime,
-            String modelVersion, List<FactorView> topFactors,
+            String modelVersion, String targetDefinition,
+            boolean calibratedProbability, List<FactorView> topFactors,
             List<String> warnings) {}
 
     public record TwinView(
             String schemaVersion, boolean synthetic, boolean researchUseOnly,
             PatientView patient, List<CgmView> cgmReadings,
-            CgmView latestCgm, long dataAgeSeconds,
+            CgmView latestCgm, Long dataAgeSeconds, String timelineMode,
+            boolean futureTimestamp,
             PredictionView prediction, Instant predictionUpdatedAt) {}
 }

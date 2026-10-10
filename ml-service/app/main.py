@@ -5,7 +5,7 @@ from __future__ import annotations
 from fastapi import FastAPI, HTTPException
 
 from app.feature_builder import InsufficientHistoryError, build_features
-from app.model_service import MODEL_VERSION, ModelService, risk_band
+from app.model_service import MODEL_VERSION, TARGET_DEFINITION, ModelService
 from app.schemas import HealthResponse, PredictionRequest, PredictionResponse
 
 
@@ -40,23 +40,29 @@ def predict(request: PredictionRequest) -> PredictionResponse:
         features, data_warnings = build_features(request)
     except InsufficientHistoryError as error:
         return PredictionResponse(
+            patientId=request.patient.patientId,
             status="insufficient_data",
             predictionTime=request.predictionTime,
             modelVersion=MODEL_VERSION,
+            targetDefinition=TARGET_DEFINITION,
             warnings=[
                 str(error),
                 "Research prototype using a synthetic demonstration patient.",
             ],
         )
 
-    probability, factors = model_service.predict(features)
+    model_score, factors = model_service.predict(features)
     return PredictionResponse(
+        patientId=request.patient.patientId,
         status="available",
-        probability=probability,
-        riskBand=risk_band(probability),
+        modelScore=model_score,
         predictionTime=request.predictionTime,
         modelVersion=MODEL_VERSION,
+        targetDefinition=TARGET_DEFINITION,
         topFactors=factors,
         warnings=data_warnings
-        + ["Research prototype using a synthetic demonstration patient."],
+        + [
+            "The model score is not a calibrated clinical probability.",
+            "Research prototype using a synthetic demonstration patient.",
+        ],
     )

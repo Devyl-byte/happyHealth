@@ -1,5 +1,7 @@
 # Python ML Service TODO: Phases 1-3
 
+> **Archived planning record:** This file describes the original mock-service plan. It is retained for history and does not describe the trained model. Use [`MODEL_CARD.md`](MODEL_CARD.md) and [`../docs/API_CONTRACT.md`](../docs/API_CONTRACT.md).
+
 > **Historical planning checklist:** the mock service has been replaced by the
 > trained, versioned 43-feature model API. See the model card, root README, and
 > `docs/PHASE_STATUS.md` for the current status.

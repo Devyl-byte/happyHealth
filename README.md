@@ -25,9 +25,10 @@ Complete these fields before submission:
 People with type 2 diabetes produce two very different forms of information:
 slow-changing health-record facts such as age, BMI, HbA1c, diagnoses, and medication,
 and fast-changing wearable readings such as glucose. Looking at only one stream loses
-context. This prototype creates one **virtual patient** by joining both streams and
-estimates whether glucose will rise by at least **40 mg/dL within two hours of a
-meal**. A doctor-facing dashboard shows the timeline, risk estimate, and the model
+context. This prototype creates one **virtual patient** by joining both streams. Its
+research event occurs when, within two hours after a meal, glucose either reaches
+**180 mg/dL** or rises by at least **40 mg/dL** above the meal-time baseline. A
+doctor-facing dashboard shows the timeline, an uncalibrated model score, and the
 features that most influenced it.
 
 ## Working demonstration
@@ -41,20 +42,24 @@ Simulated CGM ─ MQTT ────┘              │                 │
 
 The public demo uses one canonical patient, `DEMO-001`. Spring Boot stores the
 static profile and ordered sensor timeline in H2. The simulator publishes a new
-CGM reading through MQTT every five seconds. Spring Boot builds the 43-feature model
-request and calls FastAPI. React reads only the combined Spring Boot view.
+CGM reading through MQTT every five seconds. Each five-second interval represents 15
+minutes on an explicitly labelled accelerated simulation clock. The meal description
+is a repeated scenario template applied at each prediction time, not a recorded meal
+from a real person. Spring Boot builds the 43-feature model request and calls FastAPI.
+React reads only the combined Spring Boot view.
 
 Detailed diagrams and contracts:
 
 - [Architecture](docs/ARCHITECTURE.md)
-- [Architecture diagram (PowerPoint)](submission/TEAM_NAME_COLLEGE_NAME/happyhealth_architecture_diagram_v3.pptx)
-- [Architecture diagram (PDF)](submission/TEAM_NAME_COLLEGE_NAME/happyhealth_architecture_diagram_v3.pdf)
-- [Project presentation (PowerPoint)](submission/TEAM_NAME_COLLEGE_NAME/happyhealth_virtual_patient_presentation_v3.pptx)
-- [Project presentation (PDF)](submission/TEAM_NAME_COLLEGE_NAME/happyhealth_virtual_patient_presentation_v3.pdf)
+- [Architecture diagram (PowerPoint)](submission/TEAM_NAME_COLLEGE_NAME/happyhealth_architecture_diagram_v7.pptx)
+- [Architecture diagram (PDF)](submission/TEAM_NAME_COLLEGE_NAME/happyhealth_architecture_diagram_v7.pdf)
+- [Project presentation (PowerPoint)](submission/TEAM_NAME_COLLEGE_NAME/happyhealth_virtual_patient_presentation_v7.pptx)
+- [Project presentation (PDF)](submission/TEAM_NAME_COLLEGE_NAME/happyhealth_virtual_patient_presentation_v7.pdf)
 - [API contract](docs/API_CONTRACT.md)
 - [Data dictionary](docs/DATA_DICTIONARY.md)
 - [Clinical scope and safety](docs/CLINICAL_SCOPE.md)
 - [Model card](ml-service/MODEL_CARD.md)
+- [Remediation and honesty audit](docs/REMEDIATION_AUDIT.md)
 
 ## Run the complete prototype
 
@@ -70,8 +75,9 @@ Detailed diagrams and contracts:
    sends CGM readings.
 5. Stop everything with `Ctrl+C`, then run `docker compose down`.
 
-The supporting endpoints are Spring Boot at <http://localhost:8080/actuator/health>
-and FastAPI documentation at <http://localhost:8000/docs>.
+The supporting Spring Boot health endpoint is
+<http://localhost:8080/actuator/health>. FastAPI and MQTT remain inside the Compose
+network and are not published to the host.
 
 ## Run without Docker
 
@@ -106,7 +112,7 @@ already contains nine CGM readings.
 | --- | --- | --- |
 | Dashboard | React 18, TypeScript, Vite, Recharts | Doctor interaction and glucose timeline |
 | Digital twin | Java 21, Spring Boot, H2 | Merge EHR and CGM, enforce ordering/idempotency, coordinate prediction |
-| Model API | Python 3.14, FastAPI, scikit-learn | Build live features and return a probability |
+| Model API | Python 3.14, FastAPI, scikit-learn | Build live features and return an uncalibrated score |
 | Streaming | MQTT, Eclipse Mosquitto, Python publisher | Simulate a real-time wearable/IoT feed |
 | Runtime | Docker Compose, Nginx | Reproducible five-service demo |
 
@@ -115,15 +121,19 @@ already contains nine CGM readings.
 The baseline is Logistic Regression with median imputation, missingness indicators,
 and standardized features. It was evaluated with patient-level splits on the open
 ShanghaiT2DM dataset. Validation ROC AUC is **0.701** and test ROC AUC is **0.757**;
-these numbers show prototype discrimination only, not clinical readiness. Raw source
-data and patient-level prepared files are deliberately excluded from Git.
+these numbers show prototype ranking ability only, not clinical readiness. At the
+fixed 0.5 evaluation threshold, Logistic Regression F1 is **0.779** on validation and
+**0.742** on test, compared with **0.824** and **0.757** for an always-positive
+majority baseline. The displayed score is not calibrated as a patient-specific
+probability. Raw source data and patient-level prepared files are deliberately
+excluded from Git and from Docker build contexts.
 
 ## Verification
 
 ```powershell
-# Python service and schema parity
+# Data pipeline, repository consistency, Python service, and schema parity
 $env:PYTHONPATH='.;ml-service'
-.\.venv\Scripts\python.exe -m pytest ml-service\tests -q
+.\.venv\Scripts\python.exe -m pytest tests ml-service\tests -q
 
 # Java digital twin
 Set-Location backend
@@ -136,8 +146,9 @@ npm run build
 npm audit --audit-level=moderate
 ```
 
-Current automated evidence: 5 Python tests, 2 Java tests, and 2 React tests pass;
-the production frontend builds and its dependency audit reports zero vulnerabilities.
+The same checks run in GitHub Actions on branch pushes and pull requests. `npm audit`
+and `pip-audit` cover the declared JavaScript and Python dependencies; these checks
+do not establish complete application or container security.
 
 ## Repository map
 
@@ -156,7 +167,7 @@ submission/       Challenge handoff artifacts and checklist
 
 - [x] Public-source/synthetic data only in the shareable prototype
 - [x] Static EHR + dynamic wearable stream fusion
-- [x] Working adverse-event prediction algorithm
+- [x] Working research event-scoring algorithm with explicit limitations
 - [x] Conceptual doctor dashboard
 - [x] Technical stack, model documentation, architecture source, and MIT license
 - [x] Architecture diagram exported to PDF and PowerPoint
@@ -170,4 +181,5 @@ See [submission checklist](submission/SUBMISSION_CHECKLIST.md) for the final han
 ## License and data terms
 
 Project code is available under the [MIT License](LICENSE). Dataset licences and
-source-specific terms remain separate; see [dataset licence notes](DATA_LICENSES.md).
+source-specific terms remain separate; see the
+[dataset licence notes](data/external/README.md).

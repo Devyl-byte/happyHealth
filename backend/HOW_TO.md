@@ -1,5 +1,7 @@
 # How to Build the Backend Through Phase 3
 
+> **Archived planning record:** This file describes the original pre-implementation plan. It is retained for history and is not a current build guide. Use [`../README.md`](../README.md) and [`../docs/API_CONTRACT.md`](../docs/API_CONTRACT.md).
+
 > **Implementation note (2026-10-09):** This file preserves the original learning
 > plan. The Spring Boot digital twin, MQTT ingestion, H2 state, FastAPI integration,
 > and automated tests are now implemented. Use the root README, API contract, and

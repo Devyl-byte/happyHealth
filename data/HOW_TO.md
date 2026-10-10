@@ -1,5 +1,7 @@
 # How to Prepare Data Through Phase 3
 
+> **Archived planning record:** This file describes the original pre-implementation plan. It is retained for history and is not the current data guide. Use [`../docs/SHANGHAI_T2DM_PIPELINE.md`](../docs/SHANGHAI_T2DM_PIPELINE.md) and [`../DATASET_GUIDE_FOR_BEGINNERS.md`](../DATASET_GUIDE_FOR_BEGINNERS.md).
+
 Technical owner: M2. Clinical reviewer: M3. Frontend/ML consumer: M1.
 Objective: prepare one reviewed synthetic patient fixture that every service interprets consistently.
 Roadmap: [Project phases](../docs/PROJECT_PHASES.md).

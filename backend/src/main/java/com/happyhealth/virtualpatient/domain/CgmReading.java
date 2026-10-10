@@ -7,15 +7,19 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.Instant;
 
 @Entity
-@Table(indexes = @Index(name = "idx_cgm_patient_time", columnList = "patientId,observedAt"))
+@Table(
+        indexes = @Index(name = "idx_cgm_patient_time", columnList = "patientId,observedAt"),
+        uniqueConstraints = @UniqueConstraint(
+                name = "uq_cgm_patient_event", columnNames = {"patientId", "eventId"}))
 public class CgmReading {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false, unique = true, length = 100)
+    @Column(nullable = false, length = 100)
     private String eventId;
     @Column(nullable = false, length = 64)
     private String patientId;

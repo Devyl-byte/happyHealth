@@ -5,6 +5,7 @@ import com.happyhealth.virtualpatient.api.ApiModels.TwinView;
 import com.happyhealth.virtualpatient.service.PredictionCoordinator;
 import com.happyhealth.virtualpatient.service.TwinService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Size;
 import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,9 +14,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
 
 @RestController
 @RequestMapping("/api")
+@Validated
 public class TwinController {
     private final TwinService twins;
     private final PredictionCoordinator predictions;
@@ -26,20 +29,21 @@ public class TwinController {
     }
 
     @GetMapping("/patients/{patientId}/twin")
-    public TwinView getTwin(@PathVariable String patientId) {
+    public TwinView getTwin(@PathVariable @Size(max = 64) String patientId) {
         return twins.view(patientId);
     }
 
     @PostMapping("/patients/{patientId}/cgm")
     public ResponseEntity<Map<String, Object>> ingest(
-            @PathVariable String patientId, @Valid @RequestBody CgmIngestRequest request) {
+            @PathVariable @Size(max = 64) String patientId,
+            @Valid @RequestBody CgmIngestRequest request) {
         boolean created = twins.ingest(patientId, request);
         return ResponseEntity.status(created ? 201 : 200)
                 .body(Map.of("accepted", true, "created", created));
     }
 
     @PostMapping("/predictions/{patientId}/refresh")
-    public TwinView refresh(@PathVariable String patientId) {
+    public TwinView refresh(@PathVariable @Size(max = 64) String patientId) {
         return predictions.refresh(patientId);
     }
 }

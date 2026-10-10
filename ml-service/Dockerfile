@@ -1,11 +1,11 @@
-FROM python:3.14-slim
+FROM python:3.14.0-slim
 
 WORKDIR /app
 
-COPY ml-service/requirements.txt ./requirements.txt
+COPY requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY ml-service/app ./app
+COPY app ./app
 
 EXPOSE 8000
 

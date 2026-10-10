@@ -1,5 +1,7 @@
 # How to Build the Frontend Through Phase 3
 
+> **Archived planning record:** This file describes the original dashboard plan. It is retained for history and is not the current build guide. Use [`README.md`](README.md) and [`../docs/API_CONTRACT.md`](../docs/API_CONTRACT.md).
+
 > **Implementation note (2026-10-09):** This file preserves the original learning
 > plan. The responsive React doctor dashboard and its loading, failure, timeline,
 > and live-prediction states are now implemented. Use the root README and

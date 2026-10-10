@@ -69,12 +69,14 @@ class Factor(StrictModel):
 
 
 class PredictionResponse(StrictModel):
+    patientId: str = Field(min_length=1, max_length=64)
     status: Literal["available", "insufficient_data", "unavailable"]
-    probability: float | None = Field(default=None, ge=0, le=1)
-    riskBand: Literal["low", "moderate", "high"] | None = None
+    modelScore: float | None = Field(default=None, ge=0, le=1)
     predictionWindowMinutes: int = 120
     predictionTime: datetime
     modelVersion: str
+    targetDefinition: str
+    calibratedProbability: bool = False
     topFactors: list[Factor] = Field(default_factory=list)
     warnings: list[str] = Field(default_factory=list)
 

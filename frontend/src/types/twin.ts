@@ -27,11 +27,12 @@ export interface Factor {
 
 export interface Prediction {
   status: 'available' | 'insufficient_data' | 'unavailable'
-  probability: number | null
-  riskBand: 'low' | 'moderate' | 'high' | null
+  modelScore: number | null
   predictionWindowMinutes: number
   predictionTime: string
   modelVersion: string
+  targetDefinition: string
+  calibratedProbability: boolean
   topFactors: Factor[]
   warnings: string[]
 }
@@ -43,7 +44,9 @@ export interface Twin {
   patient: Patient
   cgmReadings: CgmReading[]
   latestCgm: CgmReading | null
-  dataAgeSeconds: number
+  dataAgeSeconds: number | null
+  timelineMode: 'accelerated_simulation' | 'synthetic_fixture'
+  futureTimestamp: boolean
   prediction: Prediction | null
   predictionUpdatedAt: string | null
 }

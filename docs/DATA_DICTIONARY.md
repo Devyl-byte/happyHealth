@@ -54,11 +54,12 @@ event was recorded in the prototype input. It does not prove non-adherence.
 | Field | Type | Meaning |
 | --- | --- | --- |
 | `status` | enum | `available`, `insufficient_data`, or `unavailable` |
-| `probability` | number or null | Model probability between 0 and 1 |
-| `riskBand` | enum or null | Demonstration display band derived from probability, not a clinical category |
+| `modelScore` | number or null | Uncalibrated model output between 0 and 1; not an individual clinical probability |
 | `predictionWindowMinutes` | integer | Fixed at 120 for model version 1 |
 | `predictionTime` | timestamp | Time of the baseline CGM observation used by the model |
 | `modelVersion` | string | Exact model bundle identifier |
+| `targetDefinition` | string | Exact two-condition research event predicted by this model version |
+| `calibratedProbability` | boolean | `false` for model version 1 |
 | `topFactors` | array | Largest linear contributions for this prediction; associations, not causes |
 | `warnings` | string array | Missing-data, staleness, or research-use messages |
 
@@ -67,5 +68,5 @@ event was recorded in the prototype input. It does not prove non-adherence.
 - Missing optional clinical values remain null through the backend.
 - The fitted model pipeline imputes missing numeric features using medians learned
   from training patients only.
-- The API never replaces an unavailable model result with a fabricated probability.
+- The API never replaces an unavailable model result with a fabricated score.
 - A prediction requires a current baseline and adequate recent CGM history.

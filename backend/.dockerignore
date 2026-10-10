@@ -1,0 +1,5 @@
+target
+.mvn/wrapper/maven-wrapper.jar
+*.h2.db
+*.trace.db
+*.log

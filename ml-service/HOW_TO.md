@@ -1,5 +1,7 @@
 # How to Build the Python Service Through Phase 3
 
+> **Archived planning record:** This file describes the original mock-service plan. It is retained for history and is not the current service guide. Use [`MODEL_CARD.md`](MODEL_CARD.md), [`README.md`](README.md), and [`../docs/API_CONTRACT.md`](../docs/API_CONTRACT.md).
+
 > **Implementation note (2026-10-09):** This file preserves the original learning
 > plan. The deterministic mock has been replaced by the trained, versioned
 > 43-feature Logistic Regression artifact served through FastAPI. Use the root

@@ -18,6 +18,8 @@
 - [x] Raw patient-level research data is excluded from the public repository.
 - [x] Open-source licence is present.
 - [x] Architecture PDF/PPT and presentation PDF/PPT are exported and visually checked.
+- [x] Automated Python, Java, and React tests pass outside Docker.
+- [x] Python and JavaScript dependency audits report no known issues at the checked threshold.
 - [ ] Clinical reviewer signs off visible language and limitations.
 
 ## Final public-repository check
@@ -27,3 +29,6 @@
 - [ ] Fresh `docker compose up --build` succeeds on another computer.
 - [ ] Demo video link works in an incognito/private browser window.
 - [ ] No secrets, personal health data, `.env`, or raw restricted datasets are tracked.
+
+See the [remediation and honesty audit](../docs/REMEDIATION_AUDIT.md) for the exact
+checks performed, earlier mistakes, and the limitations of this evidence.

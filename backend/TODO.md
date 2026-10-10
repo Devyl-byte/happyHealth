@@ -1,5 +1,7 @@
 # Backend TODO: Phases 1-3
 
+> **Archived planning record:** This file describes the original pre-implementation plan. It is retained for history and is not a current task list or implemented API description. Use [`../docs/PHASE_STATUS.md`](../docs/PHASE_STATUS.md) and [`../docs/API_CONTRACT.md`](../docs/API_CONTRACT.md).
+
 > **Historical planning checklist:** the working backend now goes beyond these
 > Phase 1–3 mock requirements. See the root README and `docs/PHASE_STATUS.md` for
 > verified implementation status. Unchecked boxes below are not the current

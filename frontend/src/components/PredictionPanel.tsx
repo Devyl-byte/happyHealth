@@ -16,7 +16,7 @@ export function PredictionPanel({ prediction }: { prediction: Prediction | null 
     )
   }
 
-  if (prediction.status !== 'available' || prediction.probability === null) {
+  if (prediction.status !== 'available' || prediction.modelScore === null) {
     return (
       <div className="prediction-empty warning-state">
         <AlertTriangle size={28} />
@@ -29,14 +29,14 @@ export function PredictionPanel({ prediction }: { prediction: Prediction | null 
   return (
     <div className="prediction-content">
       <div className="risk-summary">
-        <div className={`risk-ring ${prediction.riskBand}`}>
-          <strong>{percentage(prediction.probability)}</strong>
-          <span>probability</span>
+        <div className="score-ring">
+          <strong>{percentage(prediction.modelScore)}</strong>
+          <span>model score</span>
         </div>
         <div>
-          <span className={`risk-pill ${prediction.riskBand}`}>{prediction.riskBand} risk</span>
-          <h3>Glucose spike in the next {prediction.predictionWindowMinutes / 60} hours</h3>
-          <p>Estimated chance that glucose rises by at least 40 mg/dL after the current meal.</p>
+          <span className="score-label">Uncalibrated research output</span>
+          <h3>Glucose event in the next {prediction.predictionWindowMinutes / 60} hours</h3>
+          <p>{prediction.targetDefinition}</p>
         </div>
       </div>
       <div className="factors">
@@ -47,11 +47,11 @@ export function PredictionPanel({ prediction }: { prediction: Prediction | null 
               {factor.direction === 'higher' ? <ArrowUpRight size={15} /> : <ArrowDownRight size={15} />}
             </span>
             <span>{factor.displayName}</span>
-            <small>{factor.direction} estimated risk</small>
+            <small>moves the score {factor.direction}</small>
           </div>
         ))}
       </div>
-      <div className="model-note">Model {prediction.modelVersion} · research prototype, not medical advice</div>
+      <div className="model-note">Model {prediction.modelVersion} · this score is not a calibrated clinical probability or medical advice</div>
     </div>
   )
 }

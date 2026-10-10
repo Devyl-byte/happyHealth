@@ -18,6 +18,9 @@ import org.springframework.web.client.RestClient;
 @Service
 public class PredictionCoordinator {
     private static final Logger log = LoggerFactory.getLogger(PredictionCoordinator.class);
+    private static final String TARGET_DEFINITION =
+            "Within 120 minutes after the meal, glucose either reaches at least "
+                    + "180 mg/dL or rises by at least 40 mg/dL above the meal-time baseline.";
     private final TwinService twins;
     private final PredictionStore store;
     private final DemoFixture demoFixture;
@@ -47,12 +50,15 @@ public class PredictionCoordinator {
         var fixture = demoFixture.read();
         Map<String, Object> request = new LinkedHashMap<>();
         request.put("schemaVersion", "1.0");
-        request.put("patient", Map.of(
-                "patientId", patient.getPatientId(), "sex", patient.getSex(),
-                "ageYears", patient.getAgeYears(), "bmiKgM2", patient.getBmiKgM2(),
-                "diabetesDurationYears", patient.getDiabetesDurationYears(),
-                "hba1cPercent", patient.getHba1cPercent(),
-                "fastingPlasmaGlucoseMgDl", patient.getFastingPlasmaGlucoseMgDl()));
+        Map<String, Object> patientRequest = new LinkedHashMap<>();
+        patientRequest.put("patientId", patient.getPatientId());
+        patientRequest.put("sex", patient.getSex());
+        patientRequest.put("ageYears", patient.getAgeYears());
+        patientRequest.put("bmiKgM2", patient.getBmiKgM2());
+        patientRequest.put("diabetesDurationYears", patient.getDiabetesDurationYears());
+        patientRequest.put("hba1cPercent", patient.getHba1cPercent());
+        patientRequest.put("fastingPlasmaGlucoseMgDl", patient.getFastingPlasmaGlucoseMgDl());
+        request.put("patient", patientRequest);
         request.put("predictionTime", predictionTime);
         request.put("meal", fixture.currentMeal());
         request.put("cgmReadings", readings.stream().map(item -> Map.of(
@@ -64,7 +70,7 @@ public class PredictionCoordinator {
             if (result == null) {
                 throw new IllegalStateException("Model service returned an empty response");
             }
-            store.put(patientId, result.toView());
+            store.put(patientId, result.toView(patientId));
         } catch (RuntimeException error) {
             log.warn("Prediction unavailable for {}: {}", patientId, error.getMessage());
             store.put(patientId, unavailable(predictionTime,
@@ -74,17 +80,39 @@ public class PredictionCoordinator {
     }
 
     private static PredictionView unavailable(Instant time, String warning) {
-        return new PredictionView("unavailable", null, null, 120, time,
-                "unavailable", List.of(), List.of(warning));
+        return new PredictionView("unavailable", null, 120, time,
+                "unavailable", TARGET_DEFINITION, false, List.of(), List.of(warning));
     }
 
-    public record ModelResponse(String status, Double probability, String riskBand,
+    public record ModelResponse(String patientId, String status, Double modelScore,
                                 int predictionWindowMinutes, Instant predictionTime,
-                                String modelVersion, List<FactorView> topFactors,
+                                String modelVersion, String targetDefinition,
+                                boolean calibratedProbability, List<FactorView> topFactors,
                                 List<String> warnings) {
-        PredictionView toView() {
-            return new PredictionView(status, probability, riskBand,
+        public PredictionView toView(String expectedPatientId) {
+            if (!expectedPatientId.equals(patientId)) {
+                throw new IllegalArgumentException("Model response patient does not match request");
+            }
+            if (!List.of("available", "insufficient_data", "unavailable").contains(status)) {
+                throw new IllegalArgumentException("Unsupported model status");
+            }
+            if (predictionWindowMinutes != 120 || predictionTime == null
+                    || modelVersion == null || modelVersion.isBlank()) {
+                throw new IllegalArgumentException("Model response contract is incomplete");
+            }
+            if (!TARGET_DEFINITION.equals(targetDefinition) || calibratedProbability) {
+                throw new IllegalArgumentException("Model target or calibration contract changed");
+            }
+            if ("available".equals(status)
+                    && (modelScore == null || modelScore < 0.0 || modelScore > 1.0)) {
+                throw new IllegalArgumentException("Available response requires a score from 0 to 1");
+            }
+            if (!"available".equals(status) && modelScore != null) {
+                throw new IllegalArgumentException("Unavailable response must not contain a score");
+            }
+            return new PredictionView(status, modelScore,
                     predictionWindowMinutes, predictionTime, modelVersion,
+                    targetDefinition, false,
                     topFactors == null ? List.of() : topFactors,
                     warnings == null ? List.of() : warnings);
         }

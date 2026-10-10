@@ -17,9 +17,11 @@ const fixture: Twin = {
     { eventId: '2', observedAt: '2026-10-09T10:00:00Z', glucoseMgDl: 142, source: 'synthetic' },
   ],
   latestCgm: { eventId: '2', observedAt: '2026-10-09T10:00:00Z', glucoseMgDl: 142, source: 'synthetic' },
-  dataAgeSeconds: 60,
-  prediction: { status: 'available', probability: 0.36, riskBand: 'moderate', predictionWindowMinutes: 120,
+  dataAgeSeconds: null, timelineMode: 'accelerated_simulation', futureTimestamp: true,
+  prediction: { status: 'available', modelScore: 0.36, predictionWindowMinutes: 120,
     predictionTime: '2026-10-09T10:00:00Z', modelVersion: 'shanghai-logistic-v1',
+    targetDefinition: 'Within 120 minutes after the meal, glucose either reaches at least 180 mg/dL or rises by at least 40 mg/dL above the meal-time baseline.',
+    calibratedProbability: false,
     topFactors: [{ feature: 'baseline', displayName: 'Current glucose', direction: 'higher', contribution: 0.4 }],
     warnings: ['Research prototype'] },
   predictionUpdatedAt: '2026-10-09T10:00:01Z',
@@ -35,6 +37,8 @@ describe('doctor dashboard', () => {
     render(<App />)
     expect(await screen.findByText('Synthetic Patient 001')).toBeInTheDocument()
     expect(screen.getByText('36%')).toBeInTheDocument()
+    expect(screen.getByText(/Uncalibrated research output/i)).toBeInTheDocument()
+    expect(screen.getByText(/Accelerated simulation/i)).toBeInTheDocument()
     expect(screen.getByText(/Synthetic demonstration patient/i)).toBeInTheDocument()
     expect(screen.getAllByText(/mg\/dL/i).length).toBeGreaterThan(0)
   })
@@ -44,5 +48,39 @@ describe('doctor dashboard', () => {
     await screen.findByText('Synthetic Patient 001')
     await userEvent.click(screen.getByRole('button', { name: /refresh prediction/i }))
     await waitFor(() => expect(refreshPrediction).toHaveBeenCalledWith('DEMO-001'))
+  })
+
+  it('shows insufficient history without inventing a score', async () => {
+    vi.mocked(getTwin).mockResolvedValue({
+      ...fixture,
+      prediction: { ...fixture.prediction!, status: 'insufficient_data', modelScore: null,
+        topFactors: [], warnings: ['At least five CGM readings are required.'] },
+    })
+    render(<App />)
+    expect(await screen.findByText(/More sensor history needed/i)).toBeInTheDocument()
+    expect(screen.queryByText('36%')).not.toBeInTheDocument()
+  })
+
+  it('shows an unknown-patient message for a 404 response', async () => {
+    vi.mocked(getTwin).mockRejectedValue({ isAxiosError: true, response: { status: 404 } })
+    render(<App />)
+    expect(await screen.findByText(/Patient DEMO-001 was not found/i)).toBeInTheDocument()
+  })
+
+  it('marks ordinary sensor data stale after fifteen minutes', async () => {
+    vi.mocked(getTwin).mockResolvedValue({
+      ...fixture, timelineMode: 'synthetic_fixture', futureTimestamp: false, dataAgeSeconds: 1_200,
+    })
+    render(<App />)
+    expect(await screen.findByText(/20 min ago · stale/i)).toBeInTheDocument()
+  })
+
+  it('keeps the previous twin but shows a connection warning after refresh failure', async () => {
+    vi.mocked(refreshPrediction).mockRejectedValue(new Error('offline'))
+    render(<App />)
+    await screen.findByText('Synthetic Patient 001')
+    await userEvent.click(screen.getByRole('button', { name: /refresh prediction/i }))
+    expect(await screen.findByText(/Connection warning/i)).toBeInTheDocument()
+    expect(screen.getByText(/previous result/i)).toBeInTheDocument()
   })
 })

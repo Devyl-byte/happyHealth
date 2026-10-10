@@ -62,8 +62,13 @@ def test_prediction_uses_real_loaded_model() -> None:
     response = client.post("/ml/predict-glucose-spike", json=request_body())
     assert response.status_code == 200
     body = response.json()
+    assert body["patientId"] == "DEMO-001"
     assert body["status"] == "available"
-    assert 0 <= body["probability"] <= 1
+    assert 0 <= body["modelScore"] <= 1
+    assert body["calibratedProbability"] is False
+    assert "180 mg/dL" in body["targetDefinition"]
+    assert "40 mg/dL" in body["targetDefinition"]
+    assert "riskBand" not in body
     assert body["predictionWindowMinutes"] == 120
     assert body["modelVersion"] == "shanghai-logistic-v1"
     assert body["topFactors"]
@@ -75,8 +80,9 @@ def test_short_history_is_explicitly_insufficient() -> None:
     )
     assert response.status_code == 200
     body = response.json()
+    assert body["patientId"] == "DEMO-001"
     assert body["status"] == "insufficient_data"
-    assert body["probability"] is None
+    assert body["modelScore"] is None
 
 
 def test_unknown_fields_are_rejected() -> None:
@@ -90,3 +96,25 @@ def test_live_feature_schema_matches_training_schema() -> None:
     from scripts.build_shanghai_features import MODEL_FEATURE_COLUMNS as training_columns
 
     assert MODEL_FEATURE_COLUMNS == training_columns
+
+
+def test_missing_optional_labs_are_imputed() -> None:
+    payload = request_body()
+    payload["patient"]["hba1cPercent"] = None
+    payload["patient"]["fastingPlasmaGlucoseMgDl"] = None
+    response = client.post("/ml/predict-glucose-spike", json=payload)
+    assert response.status_code == 200
+    assert response.json()["status"] == "available"
+
+
+def test_future_cgm_readings_are_not_used() -> None:
+    payload = request_body()
+    payload["cgmReadings"].append(
+        {
+            "observedAt": "2026-10-09T10:15:00+00:00",
+            "glucoseMgDl": 499,
+        }
+    )
+    response = client.post("/ml/predict-glucose-spike", json=payload)
+    assert response.status_code == 200
+    assert response.json()["status"] == "available"
